@@ -1,0 +1,105 @@
+/* =====================================================================
+   NOVA FEATURES 2 — nova-features-2.css
+   ---------------------------------------------------------------------
+   Styling to go with nova-features-2.js. Load this AFTER
+   nova-extensions.css (order between the two doesn't matter much,
+   but keep both after the app's own <style> block).
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   Landscape full-player layout
+   ---------------------------------------------------------------------
+   #full-player already fills the viewport (position:fixed; inset:0),
+   so this simply turns .full-player-content into a 2-column grid when
+   #full-player carries the `is-landscape` class (added by
+   nova-features-2.js on phone-shaped landscape orientation):
+
+     [ full-top-row -------------------- spans both columns -------- ]
+     [                    |  seek                                   ]
+     [   cover art        |  main controls (prev/play/next)         ]
+     [   (left column)    |  secondary controls (fav/seek10)        ]
+     [                    |  queue/history chips                    ]
+
+   No HTML changes needed — the existing elements are just placed into
+   grid cells by class name, in whatever visual order makes sense for
+   landscape, independent of their order in the markup.
+------------------------------------------------------------------- */
+#full-player.is-landscape .full-player-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 380px);
+  grid-template-rows: auto auto auto auto auto;
+  align-items: center;
+  column-gap: 28px;
+  row-gap: 6px;
+  max-width: none;
+  width: 100%;
+  height: 100%;
+  padding: 12px calc(22px + env(safe-area-inset-right)) 12px calc(22px + env(safe-area-inset-left));
+}
+
+#full-player.is-landscape .full-top-row {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+#full-player.is-landscape .full-body {
+  grid-column: 1;
+  grid-row: 2 / span 4;
+  height: 100%;
+  padding: 0;
+  gap: 12px;
+  justify-content: center;
+}
+
+#full-player.is-landscape .full-cover-wrap {
+  width: 56%;
+  max-width: 190px;
+}
+
+#full-player.is-landscape #visualizer {
+  max-width: 190px;
+  height: 34px;
+}
+
+#full-player.is-landscape .full-meta {
+  max-width: 220px;
+}
+
+#full-player.is-landscape .full-seek-wrap {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: 0;
+  width: 100%;
+}
+
+#full-player.is-landscape .full-controls-main {
+  grid-column: 2;
+  grid-row: 3;
+  margin-top: 0;
+}
+
+#full-player.is-landscape .full-controls-secondary {
+  grid-column: 2;
+  grid-row: 4;
+  margin-top: 0;
+  gap: 22px;
+}
+
+#full-player.is-landscape .full-controls-tertiary {
+  grid-column: 2;
+  grid-row: 5;
+  margin-top: 8px;
+}
+
+/* The volume popover from nova-extensions.js still anchors correctly
+   since it's positioned relative to its own button's parent, but give
+   it a touch more clearance so it doesn't get clipped by the shorter
+   viewport height in landscape. */
+#full-player.is-landscape .ext-volume-popover {
+  bottom: auto;
+  top: 46px;
+}
+
+/* =====================================================================
+   YOUR STYLES FOR ADDITIONAL FEATURES GO HERE
+   ===================================================================== */
