@@ -1,0 +1,117 @@
+/* =====================================================================
+   NOVA EXTENSIONS — nova-extensions.css
+   ---------------------------------------------------------------------
+   Styling for UI added by nova-extensions.js. Loaded alongside it,
+   does not modify or override index.html's own <style> block.
+
+   Reuses the host app's CSS custom properties (--accent, --accent-rgb)
+   and utility classes (.glass, .icon-btn, .modal-backdrop, .modal-card,
+   .btn-ghost, kbd-style rows) so anything you add here or in your own
+   features will look native to NOVA automatically.
+   ===================================================================== */
+
+/* ---------- Keyboard shortcuts modal ---------- */
+.ext-shortcuts-card {
+  max-width: 360px;
+  padding: 22px 22px 18px;
+  text-align: left;
+}
+.ext-shortcuts-title {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+.ext-shortcuts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.ext-shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+  color: #cbd5e8;
+}
+.ext-shortcut-row kbd {
+  flex-shrink: 0;
+  min-width: 34px;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #eef2fa;
+}
+
+/* ---------- Volume popover ---------- */
+.ext-volume-popover {
+  position: absolute;
+  bottom: 46px;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 140px;
+  padding: 12px 0;
+  border-radius: 22px;
+}
+
+/* Vertical range slider (WebKit + Firefox) */
+.ext-volume-popover input[type="range"] {
+  -webkit-appearance: slider-vertical;
+  appearance: slider-vertical;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 6px;
+  height: 100%;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  outline: none;
+}
+.ext-volume-popover input[type="range"]::-webkit-slider-runnable-track {
+  width: 6px;
+  border-radius: 999px;
+  background: transparent;
+}
+.ext-volume-popover input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.35), 0 2px 8px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+.ext-volume-popover input[type="range"]::-moz-range-track {
+  width: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+}
+.ext-volume-popover input[type="range"]::-moz-range-progress {
+  width: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.ext-volume-popover input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.35), 0 2px 8px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+/* =====================================================================
+   YOUR FEATURE STYLES GO HERE
+   Prefix new classes with `ext-` to avoid colliding with anything
+   NOVA's own stylesheet defines now or in the future.
+   ===================================================================== */
