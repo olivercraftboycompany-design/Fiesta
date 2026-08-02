@@ -1,7 +1,7 @@
 /**
  * ============================================================================
- * NOVA FEATURES EXTENSION — JS ()
- * Adds 10 modular capabilities to NOVA Audio Player without HTML modifications.
+ * NOVA FEATURES EXTENSION — JS (nova-features.js)
+ * Updated with Collapsible Bottom Dock & Main-Area Full-Screen Button
  * ============================================================================
  */
 
@@ -20,7 +20,8 @@
     spatial: { active: false, pannerNode: null, x: 0, y: 0, z: -1 },
     particles: { active: true, list: [] },
     stats: { totalSeconds: 0, artistCounts: {} },
-    hotkeysActive: true
+    hotkeysActive: true,
+    isBarMinimized: false
   };
 
   // Load persisted extension state from IndexedDB
@@ -32,6 +33,7 @@
       if (saved.bookmarks) featuresState.bookmarks = new Map(saved.bookmarks);
       if (saved.stats) featuresState.stats = saved.stats;
       if (saved.visualizerMode) featuresState.visualizerMode = saved.visualizerMode;
+      if (typeof saved.isBarMinimized === 'boolean') featuresState.isBarMinimized = saved.isBarMinimized;
     });
   }
 
@@ -42,12 +44,37 @@
       notesMap: [...featuresState.notesMap.entries()],
       bookmarks: [...featuresState.bookmarks.entries()],
       stats: featuresState.stats,
-      visualizerMode: featuresState.visualizerMode
+      visualizerMode: featuresState.visualizerMode,
+      isBarMinimized: featuresState.isBarMinimized
     });
   }
 
   /* ==========================================================================
-     1. FEATURE 1: MULTI-MODE AUDIO VISUALIZER
+     1. FULL-SCREEN TOGGLE MANAGER
+     ========================================================================== */
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        showToast(`Fullscreen error: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  }
+
+  function updateFullScreenButtonText() {
+    const btn = document.getElementById('nova-fullscreen-btn');
+    if (!btn) return;
+    const isFull = !!document.fullscreenElement;
+    btn.innerHTML = isFull ? '🗕 Exit Fullscreen' : '⛶ Fullscreen';
+  }
+
+  document.addEventListener('fullscreenchange', updateFullScreenButtonText);
+
+  /* ==========================================================================
+     2. FEATURE 1: MULTI-MODE AUDIO VISUALIZER
      ========================================================================== */
   const VIS_MODES = ['bars', 'wave', 'circle', 'aura'];
 
@@ -63,7 +90,6 @@
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    // Hook into Web Audio Analyser if available
     function drawLoop() {
       requestAnimationFrame(drawLoop);
       if (!analyser || !dataArray) return;
@@ -135,7 +161,7 @@
   }
 
   /* ==========================================================================
-     2. FEATURE 2: INTERACTIVE LYRICS & NOTES DRAWER
+     3. FEATURE 2: INTERACTIVE LYRICS & NOTES DRAWER
      ========================================================================== */
   function openLyricsAndNotesModal() {
     if (!currentTrack) {
@@ -183,7 +209,7 @@
   }
 
   /* ==========================================================================
-     3. FEATURE 3: SLEEP TIMER CONTROL CENTER
+     4. FEATURE 3: SLEEP TIMER CONTROL CENTER
      ========================================================================== */
   function openSleepTimerModal() {
     const root = document.getElementById('modal-root');
@@ -253,7 +279,7 @@
   }
 
   /* ==========================================================================
-     4. FEATURE 4: SPATIAL 3D PANNER & REVERB ACOUSTICS
+     5. FEATURE 4: SPATIAL 3D PANNER & REVERB ACOUSTICS
      ========================================================================== */
   function openSpatialAudioModal() {
     const root = document.getElementById('modal-root');
@@ -283,7 +309,6 @@
 
     document.getElementById('close-spatial').onclick = () => (root.innerHTML = '');
 
-    // Bind Reverb Buttons
     root.querySelectorAll('[data-room]').forEach(btn => {
       btn.onclick = () => {
         const room = btn.getAttribute('data-room');
@@ -299,7 +324,6 @@
       };
     });
 
-    // Panning puck drag controls
     const pad = document.getElementById('spatial-pad');
     const puck = document.getElementById('spatial-puck');
     let isDragging = false;
@@ -313,7 +337,6 @@
       puck.style.left = `${x * 100}%`;
       puck.style.top = `${y * 100}%`;
 
-      // Translate to Web Audio Panner coordinates (-1 to +1)
       const panX = (x - 0.5) * 2;
       const panY = 0;
       const panZ = (y - 0.5) * 2;
@@ -332,7 +355,6 @@
       panner.panningModel = 'HRTF';
       panner.distanceModel = 'linear';
       featuresState.spatial.pannerNode = panner;
-      // Connect panner inline before destination
       masterGain.disconnect();
       masterGain.connect(panner);
       panner.connect(audioCtx.destination);
@@ -344,7 +366,7 @@
   }
 
   /* ==========================================================================
-     5. FEATURE 5: LISTENING ANALYTICS DASHBOARD
+     6. FEATURE 5: LISTENING ANALYTICS DASHBOARD
      ========================================================================== */
   function trackAnalyticsTick() {
     if (!audioEl || audioEl.paused || !currentTrack) return;
@@ -390,7 +412,7 @@
   }
 
   /* ==========================================================================
-     6. FEATURE 6: SMART "VIBE" PLAYLIST GENERATOR
+     7. FEATURE 6: SMART "VIBE" PLAYLIST GENERATOR
      ========================================================================== */
   function generateSmartPlaylist(type) {
     const allTracks = [...state.tracks.values()];
@@ -465,7 +487,7 @@
   }
 
   /* ==========================================================================
-     7. FEATURE 7: A-B LOOPER & TIMESTAMP BOOKMARKS
+     8. FEATURE 7: A-B LOOPER & TIMESTAMP BOOKMARKS
      ========================================================================== */
   function openBookmarksModal() {
     if (!currentTrack) return showToast('No track playing');
@@ -540,7 +562,7 @@
   }
 
   /* ==========================================================================
-     8. FEATURE 8: KEYBOARD HOTKEY MANAGER
+     9. FEATURE 8: KEYBOARD HOTKEY MANAGER
      ========================================================================== */
   function setupGlobalHotkeys() {
     window.addEventListener('keydown', e => {
@@ -576,6 +598,9 @@
         case 'KeyV':
           cycleVisualizerMode();
           break;
+        case 'KeyF':
+          toggleFullScreen();
+          break;
       }
     });
   }
@@ -593,6 +618,7 @@
             <div class="hotkey-row"><span>Like / Favorite Track</span><kbd>L</kbd></div>
             <div class="hotkey-row"><span>Mute Audio</span><kbd>M</kbd></div>
             <div class="hotkey-row"><span>Cycle Visualizer Mode</span><kbd>V</kbd></div>
+            <div class="hotkey-row"><span>Toggle Fullscreen</span><kbd>F</kbd></div>
           </div>
           <div class="modal-actions">
             <button id="close-hotkeys" class="btn-primary">Got It</button>
@@ -604,7 +630,7 @@
   }
 
   /* ==========================================================================
-     9. FEATURE 9: AUDIO SNIPPET TRIM & CLIP EXPORTER
+     10. FEATURE 9: AUDIO SNIPPET TRIM & CLIP EXPORTER
      ========================================================================== */
   function openClipExporterModal() {
     if (!currentTrack || !currentTrack.url) return showToast('No active track to export');
@@ -647,7 +673,7 @@
   }
 
   /* ==========================================================================
-     10. FEATURE 10: AMBIENT PARTICLE STARFIELD OVERLAY
+     11. FEATURE 10: AMBIENT PARTICLE STARFIELD OVERLAY
      ========================================================================== */
   function initParticleCanvas() {
     const playerEl = document.getElementById('full-player');
@@ -701,33 +727,56 @@
   }
 
   /* ==========================================================================
-     11. UI INTEGRATION: INJECT FEATURES BAR INTO FULL PLAYER
+     12. UI INTEGRATION: INJECT COMPACT DOCK & MAIN-AREA FULLSCREEN BUTTON
      ========================================================================== */
   function injectFeaturesUI() {
+    // 1. Inject Fullscreen Button into Main Viewport Area
+    const mainArea = document.querySelector('.main-view') || document.querySelector('.app-container') || document.body;
+    if (mainArea && !document.getElementById('nova-fullscreen-btn')) {
+      const fsBtn = document.createElement('button');
+      fsBtn.id = 'nova-fullscreen-btn';
+      fsBtn.title = 'Toggle Fullscreen (F)';
+      fsBtn.innerHTML = '⛶ Fullscreen';
+      fsBtn.onclick = toggleFullScreen;
+      mainArea.appendChild(fsBtn);
+      updateFullScreenButtonText();
+    }
+
+    // 2. Inject Minimized/Collapsible Feature Bar into Full Player
     const fullContent = document.querySelector('.full-player-content');
     if (!fullContent || document.getElementById('nova-features-bar')) return;
 
     const bar = document.createElement('div');
     bar.id = 'nova-features-bar';
-    bar.className = 'nova-feature-bar';
+    bar.className = `nova-feature-bar ${featuresState.isBarMinimized ? 'minimized' : ''}`;
     bar.innerHTML = `
-      <button class="chip-btn" id="btn-f-lyrics" title="Lyrics & Notes">📜 Lyrics</button>
-      <button class="chip-btn" id="btn-f-sleep" title="Sleep Timer">💤 Sleep</button>
-      <button class="chip-btn" id="btn-f-spatial" title="Spatial 3D">🎧 3D</button>
-      <button class="chip-btn" id="btn-f-stats" title="Analytics">📊 Stats</button>
-      <button class="chip-btn" id="btn-f-vibe" title="Smart Vibe">✨ Vibe</button>
-      <button class="chip-btn" id="btn-f-marks" title="Bookmarks & Loop">📍 Marks</button>
-      <button class="chip-btn" id="btn-f-hotkeys" title="Hotkeys">⌨️ Keys</button>
-      <button class="chip-btn" id="btn-f-clip" title="Clip Export">✂️ Clip</button>
+      <button class="nova-minimize-btn" id="btn-f-minimize" title="Toggle Feature Bar">
+        ${featuresState.isBarMinimized ? '+ Tools' : '– Minimize'}
+      </button>
+      <button class="chip-btn feature-item" id="btn-f-lyrics" title="Lyrics & Notes">📜 Lyrics</button>
+      <button class="chip-btn feature-item" id="btn-f-sleep" title="Sleep Timer">💤 Sleep</button>
+      <button class="chip-btn feature-item" id="btn-f-spatial" title="Spatial 3D">🎧 3D</button>
+      <button class="chip-btn feature-item" id="btn-f-stats" title="Analytics">📊 Stats</button>
+      <button class="chip-btn feature-item" id="btn-f-vibe" title="Smart Vibe">✨ Vibe</button>
+      <button class="chip-btn feature-item" id="btn-f-marks" title="Bookmarks & Loop">📍 Marks</button>
+      <button class="chip-btn feature-item" id="btn-f-hotkeys" title="Hotkeys">⌨️ Keys</button>
+      <button class="chip-btn feature-item" id="btn-f-clip" title="Clip Export">✂️ Clip</button>
     `;
 
-    // Insert before tertiary controls
     const tertiary = fullContent.querySelector('.full-controls-tertiary');
     if (tertiary) {
       fullContent.insertBefore(bar, tertiary);
     } else {
       fullContent.appendChild(bar);
     }
+
+    // Minimize / Expand Handler
+    document.getElementById('btn-f-minimize').onclick = () => {
+      featuresState.isBarMinimized = !featuresState.isBarMinimized;
+      bar.className = `nova-feature-bar ${featuresState.isBarMinimized ? 'minimized' : ''}`;
+      document.getElementById('btn-f-minimize').innerHTML = featuresState.isBarMinimized ? '+ Tools' : '– Minimize';
+      saveExtensionState();
+    };
 
     document.getElementById('btn-f-lyrics').onclick = openLyricsAndNotesModal;
     document.getElementById('btn-f-sleep').onclick = openSleepTimerModal;
@@ -740,7 +789,7 @@
   }
 
   /* ==========================================================================
-     12. INITIALIZATION
+     13. INITIALIZATION
      ========================================================================== */
   window.addEventListener('DOMContentLoaded', () => {
     loadExtensionState();
@@ -748,11 +797,10 @@
     initParticleCanvas();
     overrideVisualizerDraw();
 
-    // Hook into interval timers for analytics & A-B loop check
     setInterval(() => {
       trackAnalyticsTick();
       handleABLoopTick();
-      injectFeaturesUI(); // Ensure features bar remains present
+      injectFeaturesUI();
     }, 1000);
   });
 })();
