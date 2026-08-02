@@ -1,24 +1,91 @@
 /* ==========================================================================
-   NOVA FEATURES EXTENSION — CSS ()
+   NOVA FEATURES EXTENSION — CSS (nova-features.css)
+   Updated with Minimized Dock & Main-Area Full-Screen Button
    ========================================================================== */
 
-/* Floating Feature Bar in Full Player */
+/* Floating Feature Bar (Default & Minimized States) */
 .nova-feature-bar {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
-  margin-top: 14px;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 12px;
+  padding: 5px 10px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .nova-feature-bar .chip-btn {
-  padding: 6px 12px;
-  font-size: 11.5px;
+  padding: 5px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Minimized State: Hide all feature buttons except the toggle trigger */
+.nova-feature-bar.minimized {
+  padding: 4px 8px;
+  gap: 0;
+  background: rgba(15, 23, 42, 0.45);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.nova-feature-bar.minimized .feature-item {
+  display: none !important;
+}
+
+.nova-minimize-btn {
+  background: transparent;
+  border: none;
+  color: #8b98b8;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: 0.2s ease;
+}
+
+.nova-minimize-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Main Area Full-Screen Button */
+#nova-fullscreen-btn {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e8ecf5;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+}
+
+#nova-fullscreen-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent);
+  transform: translateY(-1px);
 }
 
 /* Sleep Timer Active Banner */
