@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  * NOVA FEATURES EXTENSION — JS (nova-features.js)
- * Updated with Collapsible Bottom Dock & Main-Area Full-Screen Button
+ * Updated with Circle Fullscreen Icon & Library Auto-Highlighting
  * ============================================================================
  */
 
@@ -64,17 +64,41 @@
     }
   }
 
-  function updateFullScreenButtonText() {
+  function updateFullScreenButtonUI() {
     const btn = document.getElementById('nova-fullscreen-btn');
     if (!btn) return;
     const isFull = !!document.fullscreenElement;
-    btn.innerHTML = isFull ? '🗕 Exit Fullscreen' : '⛶ Fullscreen';
+    btn.innerHTML = isFull ? '🗕' : '⛶';
+    btn.title = isFull ? 'Exit Fullscreen (F)' : 'Fullscreen (F)';
+    btn.classList.toggle('is-fullscreen', isFull);
   }
 
-  document.addEventListener('fullscreenchange', updateFullScreenButtonText);
+  document.addEventListener('fullscreenchange', updateFullScreenButtonUI);
 
   /* ==========================================================================
-     2. FEATURE 1: MULTI-MODE AUDIO VISUALIZER
+     2. AUTOMATIC LIBRARY TRACK HIGHLIGHTING
+     ========================================================================== */
+  function updateLibraryHighlight() {
+    // 1. Clear previous highlights
+    const currentlyHighlighted = document.querySelectorAll('.is-playing');
+    currentlyHighlighted.forEach(el => el.classList.remove('is-playing'));
+
+    // 2. Apply highlight to the currently playing track
+    if (!currentTrack || !currentTrack.id) return;
+    const activeTrackId = currentTrack.id;
+
+    // Matches standard data-id, data-track-id, or track-row containers
+    const matchingRows = document.querySelectorAll(
+      `[data-id="${activeTrackId}"], [data-track-id="${activeTrackId}"]`
+    );
+
+    matchingRows.forEach(row => {
+      row.classList.add('is-playing');
+    });
+  }
+
+  /* ==========================================================================
+     3. FEATURE 1: MULTI-MODE AUDIO VISUALIZER
      ========================================================================== */
   const VIS_MODES = ['bars', 'wave', 'circle', 'aura'];
 
@@ -161,7 +185,7 @@
   }
 
   /* ==========================================================================
-     3. FEATURE 2: INTERACTIVE LYRICS & NOTES DRAWER
+     4. FEATURE 2: INTERACTIVE LYRICS & NOTES DRAWER
      ========================================================================== */
   function openLyricsAndNotesModal() {
     if (!currentTrack) {
@@ -209,7 +233,7 @@
   }
 
   /* ==========================================================================
-     4. FEATURE 3: SLEEP TIMER CONTROL CENTER
+     5. FEATURE 3: SLEEP TIMER CONTROL CENTER
      ========================================================================== */
   function openSleepTimerModal() {
     const root = document.getElementById('modal-root');
@@ -279,7 +303,7 @@
   }
 
   /* ==========================================================================
-     5. FEATURE 4: SPATIAL 3D PANNER & REVERB ACOUSTICS
+     6. FEATURE 4: SPATIAL 3D PANNER & REVERB ACOUSTICS
      ========================================================================== */
   function openSpatialAudioModal() {
     const root = document.getElementById('modal-root');
@@ -366,7 +390,7 @@
   }
 
   /* ==========================================================================
-     6. FEATURE 5: LISTENING ANALYTICS DASHBOARD
+     7. FEATURE 5: LISTENING ANALYTICS DASHBOARD
      ========================================================================== */
   function trackAnalyticsTick() {
     if (!audioEl || audioEl.paused || !currentTrack) return;
@@ -412,7 +436,7 @@
   }
 
   /* ==========================================================================
-     7. FEATURE 6: SMART "VIBE" PLAYLIST GENERATOR
+     8. FEATURE 6: SMART "VIBE" PLAYLIST GENERATOR
      ========================================================================== */
   function generateSmartPlaylist(type) {
     const allTracks = [...state.tracks.values()];
@@ -487,7 +511,7 @@
   }
 
   /* ==========================================================================
-     8. FEATURE 7: A-B LOOPER & TIMESTAMP BOOKMARKS
+     9. FEATURE 7: A-B LOOPER & TIMESTAMP BOOKMARKS
      ========================================================================== */
   function openBookmarksModal() {
     if (!currentTrack) return showToast('No track playing');
@@ -562,7 +586,7 @@
   }
 
   /* ==========================================================================
-     9. FEATURE 8: KEYBOARD HOTKEY MANAGER
+     10. FEATURE 8: KEYBOARD HOTKEY MANAGER
      ========================================================================== */
   function setupGlobalHotkeys() {
     window.addEventListener('keydown', e => {
@@ -630,7 +654,7 @@
   }
 
   /* ==========================================================================
-     10. FEATURE 9: AUDIO SNIPPET TRIM & CLIP EXPORTER
+     11. FEATURE 9: AUDIO SNIPPET TRIM & CLIP EXPORTER
      ========================================================================== */
   function openClipExporterModal() {
     if (!currentTrack || !currentTrack.url) return showToast('No active track to export');
@@ -673,7 +697,7 @@
   }
 
   /* ==========================================================================
-     11. FEATURE 10: AMBIENT PARTICLE STARFIELD OVERLAY
+     12. FEATURE 10: AMBIENT PARTICLE STARFIELD OVERLAY
      ========================================================================== */
   function initParticleCanvas() {
     const playerEl = document.getElementById('full-player');
@@ -727,19 +751,19 @@
   }
 
   /* ==========================================================================
-     12. UI INTEGRATION: INJECT COMPACT DOCK & MAIN-AREA FULLSCREEN BUTTON
+     13. UI INTEGRATION: INJECT CIRCLE HEADER BTN & DOCK
      ========================================================================== */
   function injectFeaturesUI() {
-    // 1. Inject Fullscreen Button into Main Viewport Area
-    const mainArea = document.querySelector('.main-view') || document.querySelector('.app-container') || document.body;
-    if (mainArea && !document.getElementById('nova-fullscreen-btn')) {
+    // 1. Inject Circular Fullscreen Icon inside Header Action Bar (Next to Upload Button)
+    const headerActions = document.querySelector('.header-actions, .top-bar-right, .main-bar, .action-bar, header');
+    if (headerActions && !document.getElementById('nova-fullscreen-btn')) {
       const fsBtn = document.createElement('button');
       fsBtn.id = 'nova-fullscreen-btn';
-      fsBtn.title = 'Toggle Fullscreen (F)';
-      fsBtn.innerHTML = '⛶ Fullscreen';
+      fsBtn.title = 'Fullscreen (F)';
+      fsBtn.innerHTML = '⛶';
       fsBtn.onclick = toggleFullScreen;
-      mainArea.appendChild(fsBtn);
-      updateFullScreenButtonText();
+      headerActions.appendChild(fsBtn);
+      updateFullScreenButtonUI();
     }
 
     // 2. Inject Minimized/Collapsible Feature Bar into Full Player
@@ -789,7 +813,7 @@
   }
 
   /* ==========================================================================
-     13. INITIALIZATION
+     14. INITIALIZATION
      ========================================================================== */
   window.addEventListener('DOMContentLoaded', () => {
     loadExtensionState();
@@ -801,6 +825,7 @@
       trackAnalyticsTick();
       handleABLoopTick();
       injectFeaturesUI();
-    }, 1000);
+      updateLibraryHighlight(); // Continually checks & highlights the active track row
+    }, 500);
   });
 })();
